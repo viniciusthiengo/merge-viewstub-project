@@ -11,26 +11,25 @@ import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewStub;
 import android.widget.AdapterView;
-import android.widget.LinearLayout;
 import android.widget.ListView;
-
-import com.inlocomedia.android.ads.AdRequest;
-import com.inlocomedia.android.ads.AdType;
-import com.inlocomedia.android.ads.AdView;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import br.com.thiengo.geolocationads.domain.Game;
 import br.com.thiengo.geolocationads.domain.GamesAdapter;
+import br.com.thiengo.geolocationads.domain.ListViewScrollListener;
 import br.com.thiengo.geolocationads.domain.SoccerTeam;
+
+
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
 
     private List<Game> games;
-    private AdView adView;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -42,56 +41,13 @@ public class MainActivity extends AppCompatActivity
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
                 this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
-        drawer.setDrawerListener(toggle);
+        drawer.addDrawerListener(toggle);
         toggle.syncState();
 
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
 
         initResults();
-        initAds();
-    }
-
-    private void initAds(){
-        adView = new AdView(this);
-        adView.setType(AdType.DISPLAY_BANNER_SMALL );
-
-        AdRequest adRequest = new AdRequest();
-        adRequest.setAdUnitId("Ads Unit ID");
-
-        adView.loadAd(adRequest);
-
-        LinearLayout root = (LinearLayout) findViewById(R.id.content_main);
-        root.addView( adView );
-    }
-
-
-    private void initResults(){
-        ListView listView = (ListView) findViewById(R.id.list_view);
-        games = resultsGames();
-
-        listView.setAdapter( new GamesAdapter(this, games) );
-        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                Intent intent = new Intent(MainActivity.this, GameActivity.class);
-                intent.putExtra( "game", games.get(position) );
-                startActivity(intent);
-            }
-        });
-    }
-
-    private List<Game> resultsGames(){
-        List<Game> games = new ArrayList<>();
-        games.add( new Game( new SoccerTeam(R.drawable.ec_flamengo, "Flamengo"), new SoccerTeam(R.drawable.ec_santa_cruz, "Santa Cruz"), 3, 0) );
-        games.add( new Game( new SoccerTeam(R.drawable.ec_cruzeiro, "Cruzeiro"), new SoccerTeam(R.drawable.ec_ponte_preta, "Ponte Preta"), 2, 0) );
-        games.add( new Game( new SoccerTeam(R.drawable.ec_figueirense, "Figuerense"), new SoccerTeam(R.drawable.ec_botafogo, "Botafogo"), 0, 1) );
-        games.add( new Game( new SoccerTeam(R.drawable.ec_corinthians, "Corinthians"), new SoccerTeam(R.drawable.ec_atletico_mg, "Atlético MG"), 0, 0) );
-        games.add( new Game( new SoccerTeam(R.drawable.ec_sport_recife, "Sport Recife"), new SoccerTeam(R.drawable.ec_sao_paulo, "São Paulo"), 0, 0) );
-        games.add( new Game( new SoccerTeam(R.drawable.ec_santos, "Santos"), new SoccerTeam(R.drawable.ec_fluminense, "Fluminense"), 2, 1) );
-        games.add( new Game( new SoccerTeam(R.drawable.ec_internacional, "Internacional"), new SoccerTeam(R.drawable.ec_coritiba, "Coritiba"), 1, 0) );
-        games.add( new Game( new SoccerTeam(R.drawable.ec_america_mg, "América MG"), new SoccerTeam(R.drawable.ec_palmeiras, "Palmeiras"), 0, 2) );
-        return games;
     }
 
     @Override
@@ -152,28 +108,52 @@ public class MainActivity extends AppCompatActivity
     }
 
 
-    @Override
-    protected void onResume() {
-        super.onResume();
-        if( adView != null ){
-            adView.resume();
-        }
+
+
+    private void initResults(){
+
+        ListView listView = (ListView) findViewById(R.id.list_view);
+        games = resultsGames();
+
+        listView.setAdapter( new GamesAdapter(this, games) );
+        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                Intent intent = new Intent(MainActivity.this, GameActivity.class);
+                intent.putExtra( "game", games.get(position) );
+                startActivity(intent);
+            }
+        });
+
+        /* SCROLL PARA CARREGAR MAIS ITENS NO LISTVIEW */
+        ListViewScrollListener scrollListener = new ListViewScrollListener(
+                                                            this,
+                                                            (GamesAdapter) listView.getAdapter(),
+                                                            games );
+        listView.setOnScrollListener( scrollListener );
     }
 
-    @Override
-    protected void onPause() {
-        if(adView != null){
-            adView.pause( isFinishing() );
-        }
-        super.onPause();
+    public List<Game> resultsGames(){
+        List<Game> games = new ArrayList<>();
+        games.add( new Game( new SoccerTeam(R.drawable.ec_flamengo, "Flamengo"), new SoccerTeam(R.drawable.ec_santa_cruz, "Santa Cruz"), 3, 0) );
+        games.add( new Game( new SoccerTeam(R.drawable.ec_cruzeiro, "Cruzeiro"), new SoccerTeam(R.drawable.ec_ponte_preta, "Ponte Preta"), 2, 0) );
+        games.add( new Game( new SoccerTeam(R.drawable.ec_figueirense, "Figuerense"), new SoccerTeam(R.drawable.ec_botafogo, "Botafogo"), 0, 1) );
+        games.add( new Game( new SoccerTeam(R.drawable.ec_corinthians, "Corinthians"), new SoccerTeam(R.drawable.ec_atletico_mg, "Atlético MG"), 0, 0) );
+        games.add( new Game( new SoccerTeam(R.drawable.ec_sport_recife, "Sport Recife"), new SoccerTeam(R.drawable.ec_sao_paulo, "São Paulo"), 0, 0) );
+        games.add( new Game( new SoccerTeam(R.drawable.ec_santos, "Santos"), new SoccerTeam(R.drawable.ec_fluminense, "Fluminense"), 2, 1) );
+        games.add( new Game( new SoccerTeam(R.drawable.ec_internacional, "Internacional"), new SoccerTeam(R.drawable.ec_coritiba, "Coritiba"), 1, 0) );
+        games.add( new Game( new SoccerTeam(R.drawable.ec_america_mg, "América MG"), new SoccerTeam(R.drawable.ec_palmeiras, "Palmeiras"), 0, 2) );
+        return games;
     }
 
-
-    @Override
-    protected void onDestroy() {
-        if(adView != null){
-            adView.destroy();
+    public void loadProgressBar(boolean status){
+        try{
+            int visibility = status ? View.VISIBLE : View.GONE;
+            findViewById(R.id.progress_bar).setVisibility(visibility);
         }
-        super.onDestroy();
+        catch(Exception e){
+            ((ViewStub) findViewById(R.id.vs_progress_bar)).inflate();
+        }
     }
 }
+

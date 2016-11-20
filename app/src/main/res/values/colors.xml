@@ -3,4 +3,6 @@
     <color name="colorPrimary">#8BC34A</color>
     <color name="colorPrimaryDark">#689F38</color>
     <color name="colorAccent">#4CAF50</color>
+    <color name="gameBackgroundColor">#cc103b00</color>
+    <color name="navigatorBackgroundColor">#303030</color>
 </resources>

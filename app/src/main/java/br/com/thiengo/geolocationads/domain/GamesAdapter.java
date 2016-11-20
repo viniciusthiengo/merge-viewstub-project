@@ -40,6 +40,7 @@ public class GamesAdapter extends BaseAdapter {
         return position;
     }
 
+
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
         ViewHolder holder;
@@ -68,7 +69,9 @@ public class GamesAdapter extends BaseAdapter {
 
     private void fillLayout( ViewHolder holder, Game game ){
         holder.imgHome.setImageResource( game.getSoccerTeamHome().getImage() );
+        holder.imgHome.setContentDescription( game.getSoccerTeamHome().getName() );
         holder.imgVisitant.setImageResource( game.getSoccerTeamVisitant().getImage() );
+        holder.imgVisitant.setContentDescription( game.getSoccerTeamVisitant().getName() );
         holder.goalsHome.setText( String.valueOf( game.getHomeGoals() ) );
         holder.goalsVisitant.setText( String.valueOf( game.getVisitantGoals() ) );
     }

@@ -5,16 +5,9 @@ import android.support.v7.app.AppCompatActivity;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.inlocomedia.android.ads.AdRequest;
-import com.inlocomedia.android.ads.interstitial.InterstitialAd;
-import com.inlocomedia.android.ads.interstitial.InterstitialAdListener;
-
-import br.com.thiengo.geolocationads.domain.CountAds;
 import br.com.thiengo.geolocationads.domain.Game;
 
 public class GameActivity extends AppCompatActivity {
-
-    private InterstitialAd interstitialAd;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -32,56 +25,14 @@ public class GameActivity extends AppCompatActivity {
             Game game = (Game) getIntent().getParcelableExtra("game");
 
             imgHome.setImageResource( game.getSoccerTeamHome().getImage() );
+            imgHome.setContentDescription( game.getSoccerTeamHome().getName() );
             imgVisitant.setImageResource( game.getSoccerTeamVisitant().getImage() );
+            imgVisitant.setContentDescription( game.getSoccerTeamVisitant().getName() );
             goalsHome.setText( String.valueOf( game.getHomeGoals() ) );
             goalsVisitant.setText( String.valueOf( game.getVisitantGoals() ) );
-
-            initAds();
         }
         else{
             finish();
         }
-    }
-
-
-    private void initAds(){
-        InterstitialAd iAd = new InterstitialAd(this);
-        iAd.setInterstitialAdListener(new InterstitialAdListener(){
-            @Override
-            public void onAdReady(InterstitialAd ad) {
-                super.onAdReady(ad);
-                interstitialAd = ad;
-            }
-
-            @Override
-            public void onAdClosed(InterstitialAd ad) {
-                super.onAdClosed(ad);
-                finish();
-            }
-        });
-
-        AdRequest adRequest = new AdRequest();
-        adRequest.setAdUnitId( "Ads Unit ID" );
-
-        iAd.loadAd(adRequest);
-    }
-
-
-    @Override
-    public void onBackPressed() {
-        if( interstitialAd != null
-                && CountAds.isUpToShowAd(this) ){
-
-            interstitialAd.show();
-        }
-        else{
-            super.onBackPressed();
-        }
-    }
-
-    @Override
-    protected void onDestroy() {
-        CountAds.incrementCounter(this);
-        super.onDestroy();
     }
 }
